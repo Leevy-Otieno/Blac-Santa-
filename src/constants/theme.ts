@@ -1,65 +1,31 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
- */
-
-import '@/global.css';
-
-import { Platform } from 'react-native';
-
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
+export const BLAC_SANTA_COLORS = {
+  brandCrimson: "#E11D48", // rose-600 primary accent
+  brandCrimsonDark: "#BE123C", // rose-700 pressed state
+  deepVelvet: "#4C0519", // rose-950 dark hero/surface
+  burgundyInk: "#881337", // rose-900 primary dark text/icon
+  roseMuted: "#9F1239", // rose-800 secondary label
+  blushCanvas: "#FFF1F2", // rose-50 soft background
+  blushBorder: "#FFE4E6", // rose-100 subtle card border
+  roseAccentBorder: "#FECDD3", // rose-200 active input/pill border
+  rosePlaceholder: "#FDA4AF", // rose-300 input placeholder
+  pureWhite: "#FFFFFF",
+  successGreen: "#059669",
+  successBg: "#ECFDF5",
+  warningAmber: "#D97706",
+  warningBg: "#FFFBEB",
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
-
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+export const BLAC_SANTA_SPACING = {
+  screenPaddingX: 16,
+  cardRadius: 24,
+  buttonRadius: 16,
+  pillRadius: 999,
+  compactWidthBreakpoint: 380,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const BLAC_SANTA_ANIMATION = {
+  springDamping: 15,
+  pressSpringDamping: 10,
+  fadeDurationMs: 250,
+  staggerStepMs: 55,
+} as const;

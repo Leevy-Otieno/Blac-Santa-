@@ -1,57 +1,54 @@
-import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+import React from "react";
+import { Text, type TextProps, useWindowDimensions } from "react-native";
 
-import { Fonts, ThemeColor } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+export type ThemedTextRole =
+  | "hero"
+  | "title"
+  | "subtitle"
+  | "body"
+  | "caption"
+  | "accent";
 
-export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
-  themeColor?: ThemeColor;
-};
-
-export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
-  const theme = useTheme();
-
-  return <Text style={[{ color: theme[themeColor ?? 'text'] }, styles[type], style]} {...rest} />;
+export interface ThemedTextProps extends Omit<TextProps, "style"> {
+  role?: ThemedTextRole;
+  muted?: boolean;
+  className?: string;
 }
 
-const styles = StyleSheet.create({
-  small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 500,
-  },
-  smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: 700,
-  },
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: 500,
-  },
-  title: {
-    fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
-  },
-  subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 600,
-  },
-  link: {
-    lineHeight: 30,
-    fontSize: 14,
-  },
-  linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
-    color: '#3c87f7',
-  },
-  code: {
-    fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
-    fontSize: 12,
-  },
-});
+export function ThemedText({
+  role = "body",
+  muted = false,
+  className = "",
+  children,
+  ...rest
+}: ThemedTextProps) {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 380;
+
+  const roleClass =
+    role === "hero"
+      ? `${isCompact ? "text-2xl leading-7" : "text-3xl leading-9"} font-extrabold ${
+          muted ? "text-rose-200/80" : "text-rose-950"
+        }`
+      : role === "title"
+        ? `${isCompact ? "text-lg" : "text-xl"} font-extrabold ${
+            muted ? "text-rose-800/80" : "text-rose-950"
+          }`
+        : role === "subtitle"
+          ? `text-sm font-bold ${muted ? "text-rose-700/70" : "text-rose-900"}`
+          : role === "caption"
+            ? `text-xs font-medium leading-4 ${
+                muted ? "text-rose-700/70" : "text-rose-800/85"
+              }`
+            : role === "accent"
+              ? "text-xs font-extrabold uppercase tracking-wider text-rose-600"
+              : `text-sm leading-5 ${muted ? "text-rose-800/75" : "text-rose-950"}`;
+
+  return (
+    <Text className={`${roleClass} ${className}`} {...rest}>
+      {children}
+    </Text>
+  );
+}
+
+export default ThemedText;

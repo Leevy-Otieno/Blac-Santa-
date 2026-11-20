@@ -1,43 +1,36 @@
-import { version } from 'expo/package.json';
-import { Image } from 'expo-image';
-import { useColorScheme, StyleSheet } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { Platform, Text, View } from "react-native";
 
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+export interface WebBadgeProps {
+  label?: string;
+  platformTag?: string;
+  showOnlyOnWeb?: boolean;
+  className?: string;
+}
 
-import { Spacing } from '@/constants/theme';
-
-export function WebBadge() {
-  const scheme = useColorScheme();
+export function WebBadge({
+  label = "Web Preview",
+  platformTag = "BLAC SANTA",
+  showOnlyOnWeb = false,
+  className = "",
+}: WebBadgeProps) {
+  if (showOnlyOnWeb && Platform.OS !== "web") {
+    return null;
+  }
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="code" themeColor="textSecondary" style={styles.versionText}>
-        v{version}
-      </ThemedText>
-      <Image
-        source={
-          scheme === 'dark'
-            ? require('@/assets/images/expo-badge-white.png')
-            : require('@/assets/images/expo-badge.png')
-        }
-        style={styles.badgeImage}
-      />
-    </ThemedView>
+    <View
+      className={`self-start flex-row items-center gap-1.5 bg-rose-950 border border-rose-800 px-3 py-1 rounded-full ${className}`}
+    >
+      <Ionicons name="globe-outline" size={12} color="#FDA4AF" />
+      <Text className="text-[10px] font-extrabold uppercase tracking-wider text-rose-200">
+        {platformTag}
+      </Text>
+      <Text className="text-[10px] font-bold text-rose-400">•</Text>
+      <Text className="text-[10px] font-extrabold text-white">{label}</Text>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    padding: Spacing.five,
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  versionText: {
-    textAlign: 'center',
-  },
-  badgeImage: {
-    width: 123,
-    aspectRatio: 123 / 24,
-  },
-});
+export default WebBadge;

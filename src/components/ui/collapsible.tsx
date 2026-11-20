@@ -1,65 +1,89 @@
-import { SymbolView } from 'expo-symbols';
-import { PropsWithChildren, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { Pressable, Text, View } from "react-native";
+import Animated, {
+  FadeIn,
+  Layout,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+export interface CollapsibleProps {
+  title: string;
+  subtitle?: string;
+  badgeText?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}
 
-export function Collapsible({ children, title }: PropsWithChildren & { title: string }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const theme = useTheme();
+export function Collapsible({
+  title,
+  subtitle,
+  badgeText,
+  defaultOpen = false,
+  children,
+}: CollapsibleProps) {
+  const [open, setOpen] = useState(defaultOpen);
+  const rotation = useSharedValue(defaultOpen ? 180 : 0);
+
+  const chevronStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    rotation.value = withTiming(next ? 180 : 0, { duration: 220 });
+  };
 
   return (
-    <ThemedView>
+    <Animated.View
+      layout={Layout.springify()}
+      className="bg-white rounded-3xl border border-rose-100 overflow-hidden shadow-xs"
+    >
       <Pressable
-        style={({ pressed }) => [styles.heading, pressed && styles.pressedHeading]}
-        onPress={() => setIsOpen((value) => !value)}>
-        <ThemedView type="backgroundElement" style={styles.button}>
-          <SymbolView
-            name={{ ios: 'chevron.right', android: 'chevron_right', web: 'chevron_right' }}
-            size={14}
-            weight="bold"
-            tintColor={theme.text}
-            style={{ transform: [{ rotate: isOpen ? '-90deg' : '90deg' }] }}
-          />
-        </ThemedView>
+        onPress={toggle}
+        className="flex-row items-center justify-between p-4 active:bg-rose-50/60"
+      >
+        <View className="flex-1 pr-3">
+          <View className="flex-row items-center gap-2">
+            <Text className="text-sm font-extrabold text-rose-950 flex-shrink">
+              {title}
+            </Text>
+            {badgeText ? (
+              <View className="bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full">
+                <Text className="text-[10px] font-extrabold text-rose-600">
+                  {badgeText}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          {subtitle ? (
+            <Text className="text-xs text-rose-700/75 mt-0.5 leading-4">
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
 
-        <ThemedText type="small">{title}</ThemedText>
+        <Animated.View
+          style={chevronStyle}
+          className="h-8 w-8 rounded-full bg-rose-50 border border-rose-200 items-center justify-center"
+        >
+          <Ionicons name="chevron-down" size={16} color="#E11D48" />
+        </Animated.View>
       </Pressable>
-      {isOpen && (
-        <Animated.View entering={FadeIn.duration(200)}>
-          <ThemedView type="backgroundElement" style={styles.content}>
-            {children}
-          </ThemedView>
+
+      {open && (
+        <Animated.View
+          entering={FadeIn.duration(200)}
+          className="px-4 pb-4 pt-2 border-t border-rose-100"
+        >
+          {children}
         </Animated.View>
       )}
-    </ThemedView>
+    </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
-  heading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  pressedHeading: {
-    opacity: 0.7,
-  },
-  button: {
-    width: Spacing.four,
-    height: Spacing.four,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    marginTop: Spacing.three,
-    borderRadius: Spacing.three,
-    marginLeft: Spacing.four,
-    padding: Spacing.four,
-  },
-});
+export default Collapsible;
