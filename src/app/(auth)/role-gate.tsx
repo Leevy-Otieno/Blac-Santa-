@@ -1,9 +1,16 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import React, { useState } from "react";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { formatKsh } from "../../utils/format-ksh";
 
 type WorkspaceRole = "buyer" | "shop" | "admin";
 
@@ -21,27 +28,27 @@ const ROLE_OPTIONS: RoleOption[] = [
   {
     role: "buyer",
     title: "Buyer Gift Advisor",
-    badge: "Ksh 500 – 10,000",
+    badge: `${formatKsh(500)} – ${formatKsh(10000)} • +254`,
     description:
-      "Browse gifts for Him, Her, Kids, and Boss across occasions, save favorites, and order directly on WhatsApp.",
+      "Browse Nairobi gifts for Him, Her, Kids, and Boss, pinpoint shops in-app, save favorites to your wishlist, and order directly on WhatsApp.",
     icon: "gift",
     route: "/(buyer)",
   },
   {
     role: "shop",
     title: "Shop Owner Dashboard",
-    badge: "Merchant Portal",
+    badge: "Listings • Orders • Net Ksh",
     description:
-      "Add and edit gift listings, upload high-res photos, update your WhatsApp number, and track order clicks.",
+      "Publish gifts in Ksh, toggle stock availability, update order statuses, and view your gross sales, commission cut, and net revenue.",
     icon: "storefront",
     route: "/(shop)",
   },
   {
     role: "admin",
     title: "Platform Admin Console",
-    badge: "Admin Control",
+    badge: "Commissions • Oversight",
     description:
-      "Approve or onboard shops, assign shop owners, manage categories & occasions, and oversee platform users.",
+      "Track marketplace-wide gross volume, admin commission earned, shop payouts, commission rates, and partner shop status.",
     icon: "shield-checkmark",
     route: "/(admin)",
     accentDark: true,
@@ -50,6 +57,13 @@ const ROLE_OPTIONS: RoleOption[] = [
 
 export default function RoleGateScreen() {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const isWide = width >= 768;
+
+  const [selectedRole, setSelectedRole] = useState<WorkspaceRole>("buyer");
+
+  const activeOption =
+    ROLE_OPTIONS.find((item) => item.role === selectedRole) ?? ROLE_OPTIONS[0];
 
   return (
     <ScrollView
@@ -57,87 +71,132 @@ export default function RoleGateScreen() {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: Math.max(insets.bottom, 24) + 16,
+        paddingTop: Math.max(insets.top, 14),
+        paddingBottom: Math.max(insets.bottom, 24) + 115,
       }}
     >
-      <Animated.View
-        entering={FadeInDown.delay(60).springify().damping(15)}
-        className="mb-4"
-      >
-        <Text className="text-2xl font-extrabold text-rose-950">
-          Choose Your Workspace
-        </Text>
-        <Text className="text-xs text-rose-700/80 mt-1 leading-4">
-          Select how you want to use BLAC SANTA right now.
-        </Text>
-      </Animated.View>
-
-      <View className="gap-3.5">
-        {ROLE_OPTIONS.map((item, idx) => (
-          <Animated.View
-            key={item.role}
-            entering={FadeInDown.delay(110 + idx * 70)
-              .springify()
-              .damping(15)}
+      <View className={isWide ? "w-full max-w-3xl self-center" : "w-full"}>
+        {/* Top Navigation Row */}
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          className="flex-row items-center justify-between mb-3"
+        >
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityLabel="Go back"
+            className="h-10 w-10 rounded-full bg-white border border-rose-200 items-center justify-center"
           >
-            <Pressable
-              onPress={() => router.replace(item.route)}
-              className={`rounded-3xl p-4 border ${
-                item.accentDark
-                  ? "bg-rose-950 border-rose-900"
-                  : "bg-white border-rose-100"
-              } shadow-xs`}
-            >
-              <View className="flex-row items-start justify-between">
-                <View className="flex-row items-center gap-3 flex-1 pr-2">
-                  <View
-                    className={`h-11 w-11 rounded-2xl items-center justify-center ${
-                      item.accentDark ? "bg-rose-600" : "bg-rose-50"
-                    }`}
-                  >
+            <Ionicons name="arrow-back" size={18} color="#881337" />
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.replace("/")}
+            className="bg-white border border-rose-200 px-3.5 py-2 rounded-full"
+          >
+            <Text className="text-xs font-bold text-rose-900">Home</Text>
+          </Pressable>
+        </Animated.View>
+
+        {/* Header */}
+        <Animated.View
+          entering={FadeInDown.delay(60).springify().damping(15)}
+          className="mb-4"
+        >
+          <Text className="text-2xl font-extrabold text-rose-950">
+            Choose Your Workspace
+          </Text>
+          <Text className="text-xs text-rose-700/80 mt-1 leading-4">
+            Select how you want to use BLAC SANTA across Nairobi gifting, shop
+            orders, and commission tracking.
+          </Text>
+        </Animated.View>
+
+        {/* Role Selection Cards */}
+        <View className="gap-3.5 mb-5">
+          {ROLE_OPTIONS.map((item, idx) => {
+            const isSelected = item.role === selectedRole;
+            return (
+              <Animated.View
+                key={item.role}
+                entering={FadeInDown.delay(110 + idx * 70)
+                  .springify()
+                  .damping(15)}
+              >
+                <Pressable
+                  onPress={() => setSelectedRole(item.role)}
+                  onLongPress={() => router.replace(item.route)}
+                  className={`rounded-3xl p-4 border ${
+                    item.accentDark
+                      ? `bg-rose-950 ${
+                          isSelected ? "border-rose-400" : "border-rose-900"
+                        }`
+                      : `bg-white ${
+                          isSelected ? "border-rose-600" : "border-rose-100"
+                        }`
+                  }`}
+                >
+                  <View className="flex-row items-start justify-between gap-2">
+                    <View className="flex-row items-center gap-3 flex-1 pr-2">
+                      <View
+                        className={`h-11 w-11 rounded-2xl items-center justify-center shrink-0 ${
+                          item.accentDark ? "bg-rose-600" : "bg-rose-50"
+                        }`}
+                      >
+                        <Ionicons
+                          name={item.icon}
+                          size={22}
+                          color={item.accentDark ? "#FFFFFF" : "#E11D48"}
+                        />
+                      </View>
+
+                      <View className="flex-1">
+                        <Text
+                          className={`text-base font-extrabold ${
+                            item.accentDark ? "text-white" : "text-rose-950"
+                          }`}
+                        >
+                          {item.title}
+                        </Text>
+                        <Text
+                          className={`text-[11px] font-bold mt-0.5 ${
+                            item.accentDark ? "text-rose-300" : "text-rose-600"
+                          }`}
+                        >
+                          {item.badge}
+                        </Text>
+                      </View>
+                    </View>
+
                     <Ionicons
-                      name={item.icon}
+                      name={isSelected ? "checkmark-circle" : "chevron-forward"}
                       size={22}
-                      color={item.accentDark ? "#FFFFFF" : "#E11D48"}
+                      color={item.accentDark ? "#FDA4AF" : "#E11D48"}
                     />
                   </View>
 
-                  <View className="flex-1">
-                    <Text
-                      className={`text-base font-extrabold ${
-                        item.accentDark ? "text-white" : "text-rose-950"
-                      }`}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      className={`text-[11px] font-bold mt-0.5 ${
-                        item.accentDark ? "text-rose-300" : "text-rose-600"
-                      }`}
-                    >
-                      {item.badge}
-                    </Text>
-                  </View>
-                </View>
+                  <Text
+                    className={`text-xs mt-3 leading-4 ${
+                      item.accentDark ? "text-rose-200/80" : "text-rose-800/75"
+                    }`}
+                  >
+                    {item.description}
+                  </Text>
+                </Pressable>
+              </Animated.View>
+            );
+          })}
+        </View>
 
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color={item.accentDark ? "#FDA4AF" : "#E11D48"}
-                />
-              </View>
-
-              <Text
-                className={`text-xs mt-3 leading-4 ${
-                  item.accentDark ? "text-rose-200/80" : "text-rose-800/75"
-                }`}
-              >
-                {item.description}
-              </Text>
-            </Pressable>
-          </Animated.View>
-        ))}
+        {/* Enter Selected Workspace Button */}
+        <Pressable
+          onPress={() => router.replace(activeOption.route)}
+          className="flex-row items-center justify-center gap-2 bg-rose-600 active:bg-rose-700 py-4 px-5 rounded-2xl"
+        >
+          <Ionicons name="arrow-forward-circle" size={20} color="#FFFFFF" />
+          <Text className="text-white text-sm font-extrabold">
+            Continue to {activeOption.title}
+          </Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
